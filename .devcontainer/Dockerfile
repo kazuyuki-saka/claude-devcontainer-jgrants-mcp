@@ -6,7 +6,10 @@ RUN apt update && apt install -y \
   less \
   procps \
   sudo \
-  jq
+  jq \
+  python3 \
+  python3-pip \
+  python3-venv
 
 # nodeユーザーにsudo権限を付与
 RUN echo "node ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
@@ -43,3 +46,27 @@ ENV npm_config_unsafe_perm=true
 # インストール後にclaudeコマンドのシンボリックリンクを明示的に作成
 RUN npm install -g @anthropic-ai/claude-code --verbose && \
     ln -sf /usr/local/share/npm-global/lib/node_modules/@anthropic-ai/claude-code/cli.js /usr/local/share/npm-global/bin/claude
+
+# JグランツMCPをインストール
+# MCPディレクトリの作成
+RUN mkdir -p /home/node/mcp
+
+# jGrants MCP serverのクローン
+RUN git clone https://github.com/digital-go-jp/jgrants-mcp-server.git /home/node/mcp/jgrants
+
+# Python仮想環境の作成とpipのアップグレード
+RUN python3 -m venv /home/node/mcp/jgrants/venv && \
+    /home/node/mcp/jgrants/venv/bin/pip install --upgrade pip
+
+# 依存パッケージのインストール
+RUN /home/node/mcp/jgrants/venv/bin/pip install -r /home/node/mcp/jgrants/requirements.txt
+
+# Python仮想環境をPATHに追加
+ENV PATH="/home/node/mcp/jgrants/venv/bin:$PATH"
+
+# MCPサーバー起動スクリプトを作成
+RUN echo '#!/bin/bash\ncd /home/node/mcp/jgrants && python -m jgrants_mcp_server.core --port 9000 > /tmp/mcp.log 2>&1 &' > /home/node/start-mcp.sh && \
+    chmod +x /home/node/start-mcp.sh
+
+# bashrcに起動スクリプトを追加（コンテナ起動時に自動実行）
+RUN echo '\n# MCPサーバー自動起動\nif [ ! -f /tmp/mcp.pid ]; then\n  /home/node/start-mcp.sh\n  touch /tmp/mcp.pid\nfi' >> /home/node/.bashrc

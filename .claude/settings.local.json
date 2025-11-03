@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk:*)",
+      "Bash(curl:*)",
+      "Bash(echo:*)",
+      "Bash(claude mcp add:*)",
+      "Bash(claude mcp)",
+      "mcp__jgrants-mcp-server__search_subsidies"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "enableAllProjectMcpServers": false,
+  "disabledMcpjsonServers": [
+    "jgrants-mcp-server"
+  ]
+}

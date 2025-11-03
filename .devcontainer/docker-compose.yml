@@ -1,9 +1,9 @@
 version: "3.8"
-name: ${COMPOSE_PROJECT_NAME:-dev-container}
+name: ${COMPOSE_PROJECT_NAME:-dev-container-jgrants-mcp}
 services:
   devcontainer:
-    image: claude-devcontainer
-    container_name: ${CONTAINER_NAME:-claude-code}
+    image: claude-devcontainer-jgrants-mcp
+    container_name: ${CONTAINER_NAME:-claude-code-grants-mcp}
     environment:
       - TZ=Asia/Tokyo
     build:
